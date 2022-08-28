@@ -1,10 +1,10 @@
 # SigmaScale
 This is a nodejs Application that can get weight from a huge weight scale, certainly designed for a vehicle weight machine.
 
-** To get weight from machine simply select a readonly input field and click on 'Get Weight' button to get a weight value form a machine.
-** Click on a table row to update a record 
-** Press '.' or '>' key to visible the hidden input labled as 'Adjust weight', to hide it press ',' or '<'
-** 'Calculate' button is used to calculate the given data
+*To get weight from machine simply select a readonly input field and click on 'Get Weight' button to get a weight value form a machine.
+* Click on a table row to update a record 
+* Press '.' or '>' key to visible the hidden input labled as 'Adjust weight', to hide it press ',' or '<'
+* 'Calculate' button is used to calculate the given data
 
 Node version 16.17.0
 HTML 5, bootstrap, jquery 3.1.0
