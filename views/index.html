@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="/js/jquery-3.6.0.js" type="text/javascript">
+	</script>
+	<script src="/js/query-datatable.js" type="text/javascript">
+	</script>
+    <link rel='stylesheet' href='/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='/css/dataTables.bootstrap.css'>
+    <link rel='stylesheet' href='/css/buttons.bootstrap.min.css'>
+
+	<title>Qadri WeighBridge</title>
+	<style>
+		.main-logo{
+			height: 150px;
+			color: orange;
+		}
+		.main-logo > h1{
+            text-align: center;
+			font-size: 80px;
+		}
+        .hide{
+            display:none;height:0px;
+            overflow: hidden;
+            transition: all 0.5s
+        }
+
+        table > tbody > tr {
+            cursor: pointer;
+        }
+
+        table > tbody > tr:hover {
+            background-color: #ccc !important;
+        }
+        .selected{
+            outline-color:green !important;
+            border-color: green !important;
+        }
+        input, td{
+            text-transform: uppercase;
+        }
+	</style>
+</head>
+<body>
+
+<div style="width:1000px; margin:0 auto; border:1px solid #ccc; padding:25px;">
+	<div class="main-logo">
+		<h1>
+			Qadri WeighBridge
+		</h1>
+	</div>
+	<div class="row">
+		<div class="col-12">
+			<div class="form-group">
+				<label for="empty_vehicle">
+					Vehicle Number
+				</label>
+				<input placeholder="#" class="form-control" type="text" id="vehicle_no">
+			</div>
+			<div class="form-group">
+				<label for="loaded_vehicle">
+					Weight For Empty Vehicle
+				</label>
+				<input readonly onfocus="getSelectedInput(this)" value = "0"class="form-control" type="number" id="empty_weight">
+			</div>
+            <div class="form-group">
+                <label for="empty_vehicle">
+                    Weight For Loaded Vehicle
+                </label>
+                <input readonly onclick="getSelectedInput(this)" value= "0" class="form-control" type="number" id="loaded_weight">
+            </div>
+			<div class="form-group hide" id="manualWeightContainer">
+				<label for="manual_weight">
+					Adjust Vehicle Weight
+				</label>
+				<input value= "0" class="form-control" type="number" id="manual_weight">
+			</div>
+            <div class="form-group" id="manualWeightContainer">
+                <label for="manual_weight">
+                   Charges
+                </label>
+                <input value= "0" class="form-control" type="number" id="charges">
+            </div>
+			<div class="form-group">
+				<button onclick="getWeightFromMachine()" class="btn btn-warning" value="get Weight">
+					Get Weight
+				</button>
+				<button onclick= "solve()" class="btn btn-primary" value="Calculate">
+					Calculate
+				</button>
+                <button onclick= "addVehicleData()" class="btn btn-success" value="Add">
+                    Add
+                </button>
+                <button id="update-btn" data-key="" data-no="" onclick= "addVehicleData(this.getAttribute('data-key'))" class="btn btn-danger hide" value="Update">
+                    Update
+                </button>
+			</div>
+			
+		</div>
+		<div class="col-sm-6">
+			<h1 style="height:100px; color:#666; padding-top:50px;">
+				Total Weight: <span id="total_value">0.00</span> <span>Kg</span>
+			</h1>
+		</div>
+        <div class="col-sm-6">
+            <h4 style="height:100px; color:#666; padding-top:50px; text-align: right;">
+                Time: <span id="timer">0.00</span>
+            </h4>
+        </div>
+		<div class="col-xs-12">
+    <table id="example" class="table table-striped table-bordered" cellspacing="0" width="100%">
+               <thead>
+        <tr>
+            <th>
+                #Vehicle No
+            </th>
+            <th>
+                Empty Vehicle Weight
+            </th>
+            <th>
+                Loaded Vehicle Weight
+            </th>
+            <th>
+                Net Weight
+            </th>
+            <th>
+                Charges
+            </th>
+            <th>
+                Date
+            </th>
+        </tr>
+    </thead>
+    <tbody id="vehicleShowcase" >
+        <tr>
+            <td>1</td>
+            <td>Alphabet puzzle</td>
+            <td>2016/01/15</td>
+            <td>Done</td>
+            <td>1000</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Layout for poster</td>
+            <td>2016/01/31</td>
+            <td>Planned</td>
+            <td>1834</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Image creation</td>
+            <td>2016/01/23</td>
+            <td>To Do</td>
+            <td>1500</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Create font</td>
+            <td>2016/02/26</td>
+            <td>Done</td>
+            <td>1200</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Sticker production</td>
+            <td>2016/02/18</td>
+            <td>Planned</td>
+            <td>2100</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>Glossy poster</td>
+            <td>2016/03/17</td>
+            <td>To Do</td>
+            <td>899</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>Beer label</td>
+            <td>2016/05/28</td>
+            <td>Confirmed</td>
+            <td>2499</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>Shop sign</td>
+            <td>2016/04/19</td>
+            <td>Offer</td>
+            <td>1099</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>X-Mas decoration</td>
+            <td>2016/10/31</td>
+            <td>Confirmed</td>
+            <td>1750</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>Halloween invite</td>
+            <td>2016/09/12</td>
+            <td>Planned</td>
+            <td>400</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>Wedding announcement</td>
+            <td>2016/07/09</td>
+            <td>To Do</td>
+            <td>299</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>Member pasport</td>
+            <td>2016/06/22</td>
+            <td>Offer</td>
+            <td>149</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>Drink tickets</td>
+            <td>2016/11/01</td>
+            <td>Confirmed</td>
+            <td>199</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td>Album cover</td>
+            <td>2017/03/15</td>
+            <td>To Do</td>
+            <td>4999</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>15</td>
+            <td>Shipment box</td>
+            <td>2017/02/08</td>
+            <td>Offer</td>
+            <td>1399</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        
+        <tr>
+            <td>16</td>
+            <td>Wooden puzzle</td>
+            <td>2017/01/11</td>
+            <td>Done</td>
+            <td>1000</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td>Fashion Layout</td>
+            <td>2016/01/30</td>
+            <td>Planned</td>
+            <td>1834</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>18</td>
+            <td>Toy creation</td>
+            <td>2016/01/10</td>
+            <td>To Do</td>
+            <td>1550</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>19</td>
+            <td>Create stamps</td>
+            <td>2016/02/26</td>
+            <td>Done</td>
+            <td>1220</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>20</td>
+            <td>Sticker design</td>
+            <td>2017/02/18</td>
+            <td>Planned</td>
+            <td>2100</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>21</td>
+            <td>Poster rock concert</td>
+            <td>2017/04/17</td>
+            <td>To Do</td>
+            <td>899</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>22</td>
+            <td>Wine label</td>
+            <td>2017/05/28</td>
+            <td>Confirmed</td>
+            <td>2799</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>23</td>
+            <td>Shopping bag</td>
+            <td>2017/04/19</td>
+            <td>Offer</td>
+            <td>1299</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>24</td>
+            <td>Decoration for Easter</td>
+            <td>2017/10/31</td>
+            <td>Confirmed</td>
+            <td>1650</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>25</td>
+            <td>Saint Nicolas colorbook</td>
+            <td>2017/09/12</td>
+            <td>Planned</td>
+            <td>510</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>26</td>
+            <td>Wedding invites</td>
+            <td>2017/07/09</td>
+            <td>To Do</td>
+            <td>399</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>27</td>
+            <td>Member pasport</td>
+            <td>2017/06/22</td>
+            <td>Offer</td>
+            <td>249</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>28</td>
+            <td>Drink tickets</td>
+            <td>2017/11/01</td>
+            <td>Confirmed</td>
+            <td>199</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>29</td>
+            <td>Blue-Ray cover</td>
+            <td>2018/03/15</td>
+            <td>To Do</td>
+            <td>1999</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>30</td>
+            <td>TV carton</td>
+            <td>2019/02/08</td>
+            <td>Offer</td>
+            <td>1369</td>
+            <td>
+                <button type="button" class="btn btn-primary btn-xs dt-edit" style="margin-right:16px;">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-danger btn-xs dt-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <th colspan="4">
+            Total
+        </th>
+         <th>
+            <span>
+                00.0
+            </span>
+        </th>
+    </tfoot>
+            </table>
+		</div>
+	</div>
+</div>
+<script src='/js/jquery-3.1.0.min.js'></script>
+<script src='/js/jquery.dataTables.min.js'></script>
+<script src='/js/dataTables.buttons.min.js'></script>
+<script src='/js/buttons.colVis.min.js'></script>
+<script src='/js/buttons.html5.min.js'></script>
+<script src='/js/buttons.print.min.js'></script>
+<script src='/js/dataTables.bootstrap.min.js'></script>
+<script src='/js/buttons.bootstrap.min.js'></script>
+<script src='/js/jszip.min.js'></script>
+<script src='/js/pdfmake.min.js'></script>
+<script src='/js/vfs_fonts.js'></script>
+<script src='/js/bootstrap.min.js'></script>
+<script src="/js/sum().js"></script>
+
+<script>
+
+    function getFormattedDate(date) {
+  var year = date.getFullYear();
+
+  var month = (1 + date.getMonth()).toString();
+  month = month.length > 1 ? month : '0' + month;
+
+  var day = date.getDate().toString();
+  day = day.length > 1 ? day : '0' + day;
+  
+  return month + '/' + day + '/' + year;
+}
+
+    function resetData(){
+    let loadedWeight = document.querySelector('#loaded_weight');
+    let unLoadedWeight = document.querySelector('#empty_weight');
+    let customWeight = document.querySelector('#manual_weight');
+    let totalWeight = document.querySelector('#total_value');
+     let vehicleCharges = document.querySelector('#charges');
+    var vehicleNumber = document.querySelector('#vehicle_no');
+     vehicleNumber.value = '';
+     loadedWeight.value = 0;
+     unLoadedWeight.value = 0;
+     customWeight.value = 0;
+     vehicleCharges.value = 0;
+
+    }
+
+function solve(){
+	let loadedWeight = document.querySelector('#loaded_weight');
+	let unLoadedWeight = document.querySelector('#empty_weight');
+	let customWeight = document.querySelector('#manual_weight');
+	let totalWeight = document.querySelector('#total_value');
+
+	totalWeight.innerText = parseInt(parseInt(loadedWeight.value) + parseInt(customWeight.value) ) - unLoadedWeight.value
+}
+
+function addVehicleData(key = ''){
+    let updateBtn = document.querySelector('#update-btn');
+    updateBtn.classList.add('hide');
+    saveVehicleData(key);
+    printCurrentRecord();
+    fillTableWithVehicleData();
+    tableDataToEdit();
+    resetData();
+}
+
+function printCurrentRecord(){
+    let vehicleData = getVehicleData();
+    let vehicleIndexes = Object.keys(vehicleData);
+    let lastVehicleRecordIndex = vehicleIndexes[vehicleIndexes.length-1];
+    let lastVehicleData  = vehicleData[lastVehicleRecordIndex];
+    window.print();
+}
+
+function getCurrenttime(){
+    let date = new Date();
+    let hours = date.getHours()-12;
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    let noon = date.getHours() >=12 ? 'PM' : 'AM'
+    let time = {
+        hours : hours, minutes: minutes, seconds: seconds, noon: noon
+    }
+    return time;
+}
+
+function timer(){
+    let time = getCurrenttime();
+    document.querySelector('#timer').innerText = time.hours + ':' + time.minutes + ':'+ time.seconds + ' '+time.noon;
+}
+
+$(document).ready(function() {
+    $('#example').DataTable( {
+        "footerCallback": function (row, data, start, end, display) {                
+                
+                var totalAmount = 0;
+                for (var i = 0; i < display.length; i++) {
+                    totalAmount += parseInt(data[i][4]);
+                }
+                $('#totalCharges').text(totalAmount)
+       },
+       pageLength: '30',
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf'
+        ]
+    } );
+} );
+
+function getVehicleData(){
+    
+    let vehicleData = localStorage.getItem('vehicleData');
+    if(vehicleData !== null){
+        let dataObj = JSON.parse(vehicleData);
+        return dataObj
+    }
+    
+    return '';
+
+}
+
+function saveVehicleData(key){
+    let vehicleData = getVehicleData();
+    let vehicleDataIndexes = Object.keys(vehicleData);
+
+    if(vehicleDataIndexes.length === 0 && key === ''){
+        var vehicleDataNewIndex = vehicleDataIndexes.length;
+        var vehicleNumber = document.querySelector('#vehicle_no').value;
+        vehicleData = {};
+        vehicleData[vehicleDataNewIndex] = {};
+        console.log('firstRecord Added');
+    }
+
+    else if(key === ''){
+        var vehicleNumber = document.querySelector('#vehicle_no').value;
+        var vehicleDataNewIndex = vehicleDataIndexes.length;
+        console.log('New Record Added');
+    
+    } else{
+        var vehicleNumber = document.querySelector('#vehicle_no').value;
+        var vehicleDataNewIndex= key;
+        console.log(key);
+    }
+
+
+    let loadedWeight = document.querySelector('#loaded_weight');
+    let unLoadedWeight = document.querySelector('#empty_weight');
+    let customWeight = document.querySelector('#manual_weight');
+    let totalWeight = document.querySelector('#total_value');
+    let vehicleCharges = document.querySelector('#charges');
+    let time = getCurrenttime();
+    
+        vehicleData[vehicleDataNewIndex] = {
+        vehicleNumber: vehicleNumber,
+        empty: unLoadedWeight.value,
+        loaded: loadedWeight.value,
+        adjusted : customWeight.value,
+        total : totalWeight.innerText.trim(),
+        charges : vehicleCharges.value,
+        addedDate  : getFormattedDate(new Date()),
+        time : time
+
+        };
+    
+        localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+}
+
+function fillTableWithVehicleData(){
+    let vehicleData = getVehicleData();
+    let vehicleShowcase = document.querySelector('#vehicleShowcase');
+    vehicleShowcase.innerHTML = null;
+    let tableData = '';
+    for(let key in vehicleData){
+        tableData+='<tr data-key="'+key+'" ><td>'+vehicleData[key].vehicleNumber+'</td><td>'+vehicleData[key].empty+'</td><td>'+(parseInt(vehicleData[key].adjusted) + parseInt(vehicleData[key].loaded))
+        +'</td><td>'+vehicleData[key].total+'</td><td>'+vehicleData[key].charges+'</td><td>'+vehicleData[key].addedDate+' '+vehicleData[key].time.hours+':'+vehicleData[key].time.minutes +vehicleData[key].time.noon+'</td></tr>'
+    }
+    vehicleShowcase.innerHTML = tableData;
+
+}
+
+function getWeightFromMachine(){
+    $.ajax({
+        type : 'get',
+        url  : '/getWeight',
+        data : {},
+        success: function(response){
+            let data = JSON.parse(response).weight.split('');
+            let weight = [];
+             for(let i = 0; i <=data.length; i++){
+                if(data[i] >= 0 && data[i] != ' '){
+                    weight+=data[i];
+                }
+             }
+            setWeight(weight);
+        }
+    });
+}
+
+function tableDataToEdit(){
+    let tableShowcase = document.querySelector('#example');
+    let tableRows = tableShowcase.querySelectorAll('tr');
+    let vehicleNumber = document.querySelector('#vehicle_no');
+    let loadedWeight = document.querySelector('#loaded_weight');
+    let unLoadedWeight = document.querySelector('#empty_weight');
+    let customWeight = document.querySelector('#manual_weight');
+    let totalWeight = document.querySelector('#total_value');
+    let vehicleCharges = document.querySelector('#charges');
+    let vehicleData = getVehicleData();
+    let updateBtn = document.querySelector('#update-btn');
+
+    tableRows.forEach((row)=>{
+        let dataKey = row.getAttribute('data-key');
+        if(dataKey !== null){
+            row.addEventListener('click', ()=>{
+                updateBtn.setAttribute('data-no', vehicleData[dataKey]['vehicleNumber']);
+                updateBtn.setAttribute('data-key', dataKey);
+                updateBtn.classList.remove('hide');
+                vehicleNumber.value = vehicleData[dataKey]['vehicleNumber'];
+                loadedWeight.value = vehicleData[dataKey]['loaded'];
+                unLoadedWeight.value = vehicleData[dataKey]['empty'];
+                customWeight.value = vehicleData[dataKey]['adjusted'];
+                totalWeight.innerText = vehicleData[dataKey]['total'];
+                vehicleCharges.value = vehicleData[dataKey]['charges'];
+            });
+        }
+    });
+
+}
+var selectedInput = '';
+
+function getSelectedInput(element){
+    if(element.id === 'empty_weight'){
+        document.querySelector('#loaded_weight').classList.remove('selected');
+    } else{
+        document.querySelector('#empty_weight').classList.remove('selected');
+    }
+    element.classList.add('selected');
+    selectedInput = element
+}
+
+function setWeight(value){
+    selectedInput.value = value;
+}
+
+let manualWeightContainer = document.querySelector('#manualWeightContainer');
+$('body').on('keyup', (event)=>{
+    if(event.keyCode === 190){
+        manualWeightContainer.classList.remove('hide');
+    }
+    if(event.keyCode === 188){
+        manualWeightContainer.classList.add('hide');
+    }
+})
+timer();
+setInterval(timer, 999);
+fillTableWithVehicleData();
+tableDataToEdit();
+resetData();
+</script>
+
+</body>
+</html>
